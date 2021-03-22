@@ -3,6 +3,7 @@ import java.util.Scanner;
 public class Main {
     public static int index = 0 ;
     public static boolean is_game_created = false ;
+    public static boolean is_game_started = false ;
     static Scanner scanner = new Scanner(System.in);
     //-----------------------------
     public static String[] create_game(){
@@ -34,6 +35,7 @@ public class Main {
                                 user_not_found = false ;
                             } else {
                                 System.out.println("all players have role");
+                                user_not_found = false ;
                             }
                             break;
                         } else {
@@ -57,10 +59,10 @@ public class Main {
                             if (players.length > index) {
                                 players[index] = new villager(name, role);
                                 index++;
-                                user_not_found = false ;
                             } else {
                                 System.out.println("all players have role");
                             }
+                            user_not_found = false ;
                             break;
                         } else {
                             user_not_found = true ;
@@ -80,10 +82,10 @@ public class Main {
                             if (players.length > index) {
                                 players[index] = new detective(name, role);
                                 index++;
-                                user_not_found = false ;
                             } else {
                                 System.out.println("all players have role");
                             }
+                            user_not_found = false ;
                             break;
                         } else {
                             user_not_found = true ;
@@ -103,10 +105,10 @@ public class Main {
                             if (players.length > index) {
                                 players[index] = new doctor(name, role);
                                 index++;
-                                user_not_found = false ;
                             } else {
                                 System.out.println("all players have role");
                             }
+                            user_not_found = false ;
                             break;
                         } else {
                             user_not_found = true ;
@@ -126,10 +128,10 @@ public class Main {
                             if (players.length > index) {
                                 players[index] = new bulletproof(name, role);
                                 index++;
-                                user_not_found = false ;
                             } else {
                                 System.out.println("all players have role");
                             }
+                            user_not_found = false ;
                             break;
                         } else {
                             user_not_found = true ;
@@ -149,11 +151,10 @@ public class Main {
                             if (players.length > index) {
                                 players[index] = new mafia(name, role);
                                 index++;
-                                System.out.println("hi mdfk!");
-                                user_not_found = false ;
                             } else {
                                 System.out.println("all players have role");
                             }
+                            user_not_found = false ;
                             break;
                         } else {
                             user_not_found = true ;
@@ -173,10 +174,10 @@ public class Main {
                             if (players.length > index) {
                                 players[index] = new godfather(name, role);
                                 index++;
-                                user_not_found = false ;
                             } else {
                                 System.out.println("all players have role");
                             }
+                            user_not_found = false ;
                             break;
                         } else {
                             user_not_found = true ;
@@ -196,10 +197,10 @@ public class Main {
                             if (players.length > index) {
                                 players[index] = new silencer(name, role);
                                 index++;
-                                user_not_found = false ;
                             } else {
                                 System.out.println("all players have role");
                             }
+                            user_not_found = false ;
                             break;
                         } else {
                             user_not_found = true ;
@@ -212,6 +213,24 @@ public class Main {
             default:
                 System.out.println("role not found");
                     break;
+        }
+    }
+    public static void start_game(Players[] players){
+        if (!is_game_created || index  < players.length){//first make sure game is created and all players have role
+            if (!is_game_created){
+                System.out.println("no game created");
+            }
+            else if (index  < players.length){
+                System.out.println("one or more player does not have role");
+            }
+        }
+        else{
+            is_game_created = true ;
+        }
+        if (is_game_created){//prints roles and names of players
+            for (Players player: players) {
+                System.out.println(player.player_name + " : " + player.role);
+            }
         }
     }
     public static void main(String[] args) {
@@ -233,6 +252,9 @@ public class Main {
                     break;
                     case "role_assign":
                         role_assign(players_name , players);
+                    break;
+                    case "start_game":
+                        start_game(players);
                     break;
                 }
         }
