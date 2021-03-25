@@ -4,9 +4,6 @@ public class Game {
     //game depends on coutn of villagers and mafias
     int count_of_villagers = 0 ;
     int count_of_mafias = 0 ;
-    //.
-    String Day = "Day" ;
-    String Night = "Night";
     int num_of_Day = 1 ;
     int num_of_Night = 1 ;
     boolean is_it_day = true ;

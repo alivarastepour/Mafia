@@ -7,14 +7,14 @@ public class Main {
     static Scanner scanner = new Scanner(System.in);
     //-----------------------------
     //-----------------------------
-    public static String[] create_game(){
-        //this method split the names
-        //and then puts them in an array
+    public static String[] create_game(){ //this method split the names and then puts them in an array
+       
         game = new Game();
         game.player_names_user_input_String = scanner.nextLine();//gets all names in 1 string
         game.player_names_user_input_array = game.player_names_user_input_String.split(" ");//splits them to array elements
         is_game_created = true ;//gotta know whether the game is created or not
         return game.player_names_user_input_array ;//returns an array of player names(consider that first element of this array is just a blank line)
+        
         
     }
     //-----------------------------
@@ -234,6 +234,7 @@ public class Main {
             }
             else{
                 votee_voter_validation = false ;
+                
             }
         }
         return votee_voter_validation ;
@@ -288,6 +289,16 @@ public class Main {
         }
     }
     //-----------------------------
+    public static boolean joker_was_killed_at_day(Players[] players){
+        boolean joker_was_killed_at_day = false ;
+        for (int i = 0; i < players.length; i++) {
+            if (players[i] instanceof Joker){
+                joker_was_killed_at_day = ((Joker) players[i]).killed_at_day;
+            }
+        }
+        return joker_was_killed_at_day ;
+    }
+    //-----------------------------
     public static void start_game(Players[] players){
         if (!is_game_created || index  < players.length){//first make sure game is created and all players have role
             if (!is_game_created){
@@ -310,51 +321,96 @@ public class Main {
     //-----------------------------
     public static void voting(Players[] players) {
         int num_of_votes = 0;
-        while (num_of_votes < index) {
-            String voter = scanner.next();
-            String votee = scanner.next();
-            boolean voter_validation = votee_voter_validation(voter, players);
-            boolean votee_validation = votee_voter_validation(votee, players);
-            while (!voter_validation) {
-                System.out.println("voter not found,re_enter the voter name");
-                voter = scanner.next();
-                voter_validation = votee_voter_validation(voter, players);
+        boolean joker_kill_time = joker_was_killed_at_day(players) ;
+        while (!joker_kill_time && ((game.count_of_mafias != 0) && game.count_of_villagers >= game.count_of_mafias) ){
+            if (game.is_it_day){
+                System.out.println("day : " + game.num_of_Day);
+                inner_loop : while (num_of_votes < index) {
+                    String voter = scanner.next();
+                    if (voter.equals("end_vote")){
+                        break inner_loop;
+                    }
+                    String votee = scanner.next();
+                    boolean voter_validation = votee_voter_validation(voter, players);
+                    boolean votee_validation = votee_voter_validation(votee, players);
+                    while (!voter_validation) {
+                        System.out.println("voter not found,re_enter the voter name");
+                        voter = scanner.next();
+                        voter_validation = votee_voter_validation(voter, players);
+                    }
+                    while (!votee_validation) {
+                        System.out.println("votee not found,re_enter the votee name");
+                        votee = scanner.next();
+                        votee_validation = votee_voter_validation(votee, players);
+                    }
+                    boolean voter_aliveness = votee_voter_aliveness(voter , players);
+                    boolean votee_aliveness = votee_voter_aliveness(votee , players);
+                    while (!voter_aliveness){
+                        System.out.println("voter is dead! re_enter the voter name");
+                        voter = scanner.next();
+                        voter_aliveness = votee_voter_aliveness(voter , players) ;
+                    }
+                    while (!votee_aliveness){
+                        System.out.println("votee is dead! re_enter the votee name");
+                        votee = scanner.next();
+                        votee_aliveness = votee_voter_aliveness(votee , players) ;
+                    }
+                    boolean voter_silence = votee_voter_silence(voter , players) ;
+                    while (voter_silence){
+                        System.out.println("voter is silenced! re-enter the voter name ");
+                        voter = scanner.next();
+                        voter_silence = votee_voter_silence(voter , players) ;
+                    }
+                    boolean already_voted = have_i_voted(voter , players);
+                    while (already_voted){
+                        System.out.println("voter has already voted.re-enter the voter name");
+                        voter = scanner.next();
+                        already_voted = have_i_voted(voter , players);
+                    }
+                    i_have_voted(voter , players);
+                    i_have_gained_a_vote(votee , players);
+                    num_of_votes++;
+        
+                }
+                int max_votes = players[0].votes_gained ;//to find the player with more votes
+                int index_max_votes = 0 ;//to know their index in array
+                for (int i = 1; i < players.length; i++) {//to check who has more votes
+                        if (players[i].votes_gained > max_votes){
+                            max_votes = players[i].votes_gained ;
+                            index_max_votes = i ;
+                        }
+                }
+                int equal_votes = 0 ;
+                for (int i = 0; i < players.length; i++) {
+                    if (players[i].votes_gained == max_votes)
+                        equal_votes++;
+                }
+                if (equal_votes == 1){//one and only one max vote will cause s.one to die
+                    if (players[index_max_votes].role.equals("joker")){
+                        System.out.println("joker won !");
+                        joker_kill_time = true ;
+                    }
+                    else{
+                        players[index_max_votes].is_alive = false ;
+                        System.out.println(players[index_max_votes].player_name + " died with " + players[index_max_votes].votes_gained + " votes");
+                    }
+                }
+                else {//different players with same max votes will cause no one to die
+                    System.out.println("no one died!");
+                }
+                for (int i = 0; i < players.length; i++) {//they have voted once and now the iteration is finished
+                    players[i].already_voted = false ;
+                    players[i].votes_gained = 0 ;
+                }
+                num_of_votes = 0 ;
+                game.num_of_Day++;
+                game.is_it_day = false ;//it will cause the game to ignore the day (IF) in loop
             }
-            while (!votee_validation) {
-                System.out.println("votee not found,re_enter the votee name");
-                votee = scanner.next();
-                votee_validation = votee_voter_validation(votee, players);
+            else {
             }
-            boolean voter_aliveness = votee_voter_aliveness(voter , players);
-            boolean votee_aliveness = votee_voter_aliveness(votee , players);
-            while (!voter_aliveness){
-                System.out.println("voter is dead! re_enter the voter name");
-                voter = scanner.next();
-                voter_aliveness = votee_voter_aliveness(voter , players) ;
-            }
-            while (!votee_aliveness){
-                System.out.println("votee is dead! re_enter the votee name");
-                votee = scanner.next();
-                votee_aliveness = votee_voter_aliveness(votee , players) ;
-            }
-            boolean voter_silence = votee_voter_silence(voter , players) ;
-            while (voter_silence){
-                System.out.println("voter is silenced! re-enter the voter name ");
-                voter = scanner.next();
-                voter_silence = votee_voter_silence(voter , players) ;
-            }
-            boolean already_voted = have_i_voted(voter , players);
-            while (already_voted){
-                System.out.println("voter has already voted.re-enter the voter name");
-                voter = scanner.next();
-                already_voted = have_i_voted(voter , players);
-            }
-            i_have_voted(voter , players);
-            i_have_gained_a_vote(votee , players);
-            num_of_votes++;
-            
         }
-        num_of_votes = 0 ;
+
+        
     }
         //-----------------------------
         public static void main (String[]args){
