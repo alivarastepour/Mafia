@@ -7,4 +7,5 @@ public class Game {
     int num_of_Day = 1 ;
     int num_of_Night = 1 ;
     boolean is_it_day = true ;
+    boolean swapped_chars = false ;
 }

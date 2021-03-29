@@ -223,6 +223,32 @@ public class Main {
                 }
                 game.count_of_mafias++;
                 break;
+            case "informer":
+                if (!is_game_created){
+                    System.out.println("no game created");
+                }
+                else {
+                    for (String s : players_name) {
+                        if (name.equals(s)) {
+                            if (players.length > index) {
+                                players[index] = new informer(name, role);
+                                players[index].should_be_awake_at_night = false ;
+                                index++;
+                            } else {
+                                System.out.println("all players have role");
+                            }
+                            user_not_found = false ;
+                            break;
+                        } else {
+                            user_not_found = true ;
+                
+                        }
+                    }
+                    if (user_not_found)
+                        System.out.println("user not found");
+                }
+                game.count_of_villagers++;
+                break;
             default:
                 System.out.println("role not found");
                     break;
@@ -376,6 +402,11 @@ public class Main {
                     if (voter.equals("end_vote")){
                         break inner_loop;
                     }
+                    if (voter.equals("get_game_state")){
+                        System.out.println("num of villagers : " + game.count_of_villagers);
+                        System.out.println("num of mafias : " + game.count_of_mafias);
+                        voter = scanner.next();
+                    }
                     String votee = scanner.next();
                     boolean voter_validation = votee_voter_validation(voter, players);
                     boolean votee_validation = votee_voter_validation(votee, players);
@@ -471,6 +502,7 @@ public class Main {
                 if (game.count_of_mafias == 0 || game.count_of_villagers <= game.count_of_mafias){
                     if (game.count_of_villagers <= game.count_of_mafias){
                         System.out.println("mafia won!");
+                        
                     }
                     else{
                         System.out.println("villagers won!");
@@ -494,13 +526,28 @@ public class Main {
 //                    System.out.println("u have passed through night");
                     night = scanner.next();
                     if (night.equals("end_night")){
+                        System.out.println("is god willing to swap characters?");
+                        String swap_characters= scanner.next();
+                        if (swap_characters.equals("yes")){
+                            swap_character(players);
+                        }
                         break;
+                    }
+                    if (night.equals("get_game_state")){
+                        System.out.println("num of villagers : " + game.count_of_villagers);
+                        System.out.println("num of mafias : " + game.count_of_mafias);
+                        night = scanner.next();
                     }
                     boolean night_validation = votee_voter_validation(night ,players) ;
                     while (!night_validation){
                         System.out.println("player not found.re-enter the name");
                         night = scanner.next();
                         if (night.equals("end_night")){
+                            System.out.println("is god willing to swap characters?");
+                            String swap_characters= scanner.next();
+                            if (swap_characters.equals("yes")){
+                                swap_character(players);
+                            }
                             break;
                         }
                         night_validation = votee_voter_validation(night ,players) ;
@@ -510,6 +557,11 @@ public class Main {
                         System.out.println("player is dead.re-enter the name");
                         night = scanner.next();
                         if (night.equals("end_night")){
+                            System.out.println("is god willing to swap characters?");
+                            String swap_characters= scanner.next();
+                            if (swap_characters.equals("yes")){
+                                swap_character(players);
+                            }
                             break;
                         }
                         night_aliveness = votee_voter_aliveness(night , players) ;
@@ -519,6 +571,11 @@ public class Main {
                         System.out.println("player "+ night  +" cant wake up during night.re-enter the name");
                         night = scanner.next();
                         if (night.equals("end_night")){
+                            System.out.println("is god willing to swap characters?");
+                            String swap_characters= scanner.next();
+                            if (swap_characters.equals("yes")){
+                                swap_character(players);
+                            }
                             break;
                         }
                         should_be_awake_night = should_be_awake_night(night , players) ;
@@ -596,11 +653,6 @@ public class Main {
                                     }
                                 }
                                 case "detective" -> {
-                                    for (Players value : players) {
-                                        if (night.equals(value.player_name)) {
-                                            ((detective) value).already_detected = true;
-                                        }
-                                    }
                                     String who_to_detect = scanner.next();
                                     boolean who_to_detect_validation = votee_voter_validation(who_to_detect, players);
                                     while (!who_to_detect_validation) {
@@ -613,6 +665,16 @@ public class Main {
                                         System.out.println("player to be detected is not alive.re-enter the name");
                                         who_to_detect = scanner.next();
                                         who_to_detect_aliveness = votee_voter_aliveness(who_to_detect, players);
+                                    }
+                                    boolean al_de = ((detective) player).already_detected ;
+                                    if (al_de){
+                                        System.out.println("detective has already detected");
+                                        continue x ;
+                                    }
+                                    for (Players value : players) {
+                                        if (night.equals(value.player_name)) {
+                                            ((detective) value).already_detected = true;
+                                        }
                                     }
                                     for (Players value : players) {
                                         if (who_to_detect.equals(value.player_name)) {
@@ -671,12 +733,19 @@ public class Main {
                 }
                 if (num_of_same_max_votes == 1){
                     if (players[index_max_votes].saved_by_doctor){
-                        System.out.println("no one died.doctor saved");
+                        System.out.println("mafia tried to kill " + players[index_max_votes].player_name + " but couldnt");
                         players[index_max_votes].saved_by_doctor = false ;
+                    }
+                    else if (players[index_max_votes].role.equals("informer")){
+                        System.out.println(players[index_max_votes].player_name + " died with " +players[index_max_votes].votes_gained+ " votes" );
+                        System.out.println("they were informer");
+                        players[index_max_votes].is_alive = false ;
+                        game.count_of_villagers--;
+                        ((informer)players[index_max_votes]).informing(players,max_vote_night,game);
                     }
                     else if (players[index_max_votes].role.equals("bulletproof")){
                         if (((bulletproof)players[index_max_votes]).remaining_spare_life == 1){
-                            System.out.println("no one died(bulletproof)");
+                            System.out.println("mafia tried to kill " + players[index_max_votes].player_name + " but couldnt");
                             ((bulletproof)players[index_max_votes]).remaining_spare_life = 0 ;
                         }
                         else {
@@ -715,7 +784,10 @@ public class Main {
                     player.votes_gained = 0;
                     player.already_voted = false;
                     player.already_voted_to = "";
-//                    players[i].is_silenced = false ;
+                    if (player instanceof detective){
+                    (((detective)player).already_detected) = false ;
+                    }
+                    game.swapped_chars = false ;
                 }
                 if (game.count_of_mafias == 0 || game.count_of_villagers <= game.count_of_mafias){
                     if (game.count_of_villagers <= game.count_of_mafias){
@@ -731,8 +803,57 @@ public class Main {
             }
         }
     }
-        //-----------------------------
-        public static void main (String[]args){
+    //-----------------------------
+    public static void swap_character(Players[] players){
+        String first , last ;
+        first = scanner.next();
+        last = scanner.next();
+        boolean first_validation = votee_voter_validation(first, players);
+        while (!first_validation) {
+            System.out.println("player to be swapped not found.re-enter the name");
+            first = scanner.next();
+            first_validation = votee_voter_validation(first, players);
+        }
+        boolean first_aliveness = votee_voter_aliveness(first, players);
+        while (!first_aliveness) {
+            System.out.println("player to be swapped is already dead.re-enter the name");
+            first = scanner.next();
+            first_aliveness = votee_voter_aliveness(first, players);
+        }
+//        last = scanner.next();
+        boolean last_validation = votee_voter_validation(last, players);
+        while (!last_validation) {
+            System.out.println("player to be swapped not found.re-enter the name");
+            last = scanner.next();
+            last_validation = votee_voter_validation(last, players);
+        }
+        boolean last_aliveness = votee_voter_aliveness(last, players);
+        while (!last_aliveness) {
+            System.out.println("player to be swapped is already dead.re-enter the name");
+            last = scanner.next();
+            last_aliveness = votee_voter_aliveness(last, players);
+        }
+        String holder = "holder" ;
+        for (int i = 0; i < players.length; i++) {
+            if (players[i].player_name.equals(first)){
+                players[i].player_name = "holder" ;
+            }
+        }
+        for (int i = 0; i < players.length; i++) {
+            if (players[i].player_name.equals(last)){
+                players[i].player_name = first ;
+            }
+        }
+        for (int i = 0; i < players.length; i++) {
+            if (players[i].player_name.equals("holder"))
+                players[i].player_name = last ;
+        }
+    
+        System.out.println("swapped chars between " + first + " and " + last);
+        game.swapped_chars = true ;
+    }
+    //-----------------------------
+    public static void main (String[]args){
             String[] list_of_players = null;//retrieve the output of create_game func.
             String[] players_name = null;//removes the unwanted array element(explained in a comment in line 15)
             Players[] players = null;//creates an array of players to be upcasted afterwards
