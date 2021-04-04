@@ -7,11 +7,9 @@ public class bulletproof extends Players{
     public void setNight_attack(boolean night_attack) {
         this.night_attack = night_attack;
     }
-    public void use_spare_life(boolean night_attack){
-        remaining_spare_life = 0 ;
-    }
     // a constructor which is mainly used to instantiate a new object
-    public bulletproof(String player_name, Role role) {
+    public bulletproof(String player_name, String role) {
         super(player_name, role);
     }
+    
 }

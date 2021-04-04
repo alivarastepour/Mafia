@@ -7,7 +7,7 @@ public class doctor extends Players{
         this.who_to_save = who_to_save;
     }
     // a constructor which is mainly used to instantiate a new object
-    public doctor(String player_name, Role role) {
+    public doctor(String player_name, String role) {
         super(player_name, role);
     }
 }

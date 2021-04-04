@@ -5,6 +5,9 @@ public class Players {
     boolean is_alive = true ;//game should know who is dead
     boolean is_silenced = false ;//game should know who is silenced
     boolean already_voted = false ;//only one vote per person is valid
+    boolean should_be_awake_at_night = false;
+    boolean saved_by_doctor = false ;
+    String already_voted_to = " ";
     int votes_gained = 0 ;//to retrieve number of gained votes per person
     // a constructor which is mainly used to instantiate a new object
     public Players(String player_name, String role) {
